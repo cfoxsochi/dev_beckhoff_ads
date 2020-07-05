@@ -5,10 +5,18 @@
 <p>
 </p>
 <table width=100% border=0><tr>
-<td valign=top>TD1
-
-
+<td valign=top>
 <!-- results -->
+<table border=1>
+<tr>
+<td>
+    Megaresult
+</td>
+</tr>
+</table>
+
+
+
 [#if RESULT#]
 <!-- paging -->
 [#if PAGES#]
@@ -25,6 +33,8 @@
 [#endif PAGES#]
 <!-- / paging -->
 <!-- search results (list) -->
+
+before_form_frmList_beckhoff_variables
 <form action="?" method="post" name="frmList_beckhoff_variables" style="padding:0px" class="form">
 <table  align=center class="table table-striped">
 <tbody>

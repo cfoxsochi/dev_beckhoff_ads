@@ -21,6 +21,7 @@ function __construct() {
   $this->title="BeckHoff ADS";
   $this->module_category="<#LANG_SECTION_DEVICES#>";
   $this->checkInstalled();
+  $this->port=8081;
 }
 /**
 * saveParams
@@ -80,6 +81,87 @@ function getParams() {
   if (isset($tab)) {
    $this->tab=$tab;
   }
+}
+function strtotype($type, $value=null){
+    if ($type=='BOOL'){
+	if (is_null($value)) return false;
+	if ($value=='1') return true;
+	return false;
+    }
+    if ($type=='BYTE'){
+	if (is_null($value)) return 0;
+	return (int) $value;
+    }
+    if ($type=='STRING'){
+	if (is_null($value)) return '';
+	return $value;
+    }
+
+    return (int) $value;
+}
+function typetostr($type,$value){
+    if ($type=='BOOL'){
+	if ($value == true){
+	    return '1';
+	} else {
+	    return '0';
+	}
+    }
+    if ($type=='STRING')
+	return $value;
+    return (string)$value;
+}
+function getVariables(){
+    $result = array();
+    $res=SQLSelect("SELECT * FROM beckhoff_variables ORDER BY `ID`");
+    foreach ($res as $res_item){
+	$result[$res_item['TITLE']] = array(
+			'type'=>$res_item['TYPE_VAR'],
+			'def'=>$this->strtotype($res_item['TYPE_VAR'],$res_item['VALUE'])
+		    );
+    }    
+    return $result;
+}
+function httpRequest($type, $data=array()){
+    $url="http://127.0.0.1:{$this->port}";    
+    $opts = array(
+	'http'=>array(
+	    'method'=>$type,
+	    'header'=>"Content-type:application/json\r\n",
+	    'content'=>json_encode($data)
+    
+        )
+    );
+//    var_dump($opts);
+    $context = stream_context_create($opts);
+    return file_get_contents($url, false, $context);
+}
+
+function readVariables(){
+    $result = array();
+    $variables = SQLSelect("SELECT * FROM beckhoff_variables ORDER BY `ID`");
+    $ads_result=json_decode($this->httpRequest('GET'),true);
+//    var_dump($ads_result['bHallLightMain']);
+    $updateVars=array();
+    foreach ($variables as $var_item){
+	if (isset($ads_result[$var_item['TITLE']])){
+	    $var_item['VALUE']=$this->typetostr($var_item['TYPE_VAR'],$ads_result[$var_item['TITLE']]);
+//	    var_dump($var_item['TYPE_VAR']);
+#	    $updateVars[]=$var_item;
+	    SQLUpdate('beckhoff_variables', $var_item);
+	}
+    }   
+
+    return;
+//    var_dump($updateVars);
+    return $result;
+    foreach ($ads_result as $var_name=>$var_value){
+	if (isset($variables[$var_name])){
+	    
+	    var_dump($var_name);
+	}
+    }
+    return $result;
 }
 /**
 * Run
@@ -144,7 +226,7 @@ function admin(&$out) {
   $out['SET_DATASOURCE']=1;
  }
  if ($this->data_source=='beckhoff_variables' || $this->data_source=='') {
-  if ($this->view_mode=='' || $this->view_mode=='search_beckhoff_variables') {
+  if ($this->view_mode=='' || $this->view_mode=='view_beckhoff_ads') {
    $this->search_beckhoff_variables($out);
   }
   if ($this->view_mode=='edit_beckhoff_variables') {
@@ -183,7 +265,21 @@ function usual(&$out) {
 * @access public
 */
  function search_beckhoff_variables(&$out) {
-  require(DIR_MODULES.$this->name.'/beckhoff_variables_search.inc.php');
+    $res=SQLSelect("SELECT * FROM beckhoff_variables ORDER BY `ID`");
+#    $res2=$this->getVariables();
+#    $res3=$this->readVariables();
+
+#    var_dump($res2);
+#    var_dump($res3);
+    $out['RESULT'] = $res;
+//    $out['RESULT'][0] = array (
+//		    'NAME'=>'VariableName',
+//		    'TYPE'=>'BOOL',
+//		    'DEFVALUE' => 'FALSE',
+//		    'VALUE'=> 1
+//		);
+
+//  require(DIR_MODULES.$this->name.'/beckhoff_variables_search.inc.php');
  }
 /**
 * beckhoff_variables edit/add
@@ -232,6 +328,24 @@ function usual(&$out) {
  }
  function processCycle() {
  $this->getConfig();
+ $vars=$this->getVariables();
+ file_put_contents(DIR_MODULES.$this->name.'/run_variables',json_encode($vars));
+ $this->readVariables();
+ $rec = SQLSelect ('SELECT * FROM beckhoff_variables WHERE NOT ISNULL(NEW_VALUE)');
+ $vars=array();
+// $recs = array();
+ foreach ($rec as $rec_item){
+    $vars[$rec_item['TITLE']]=$this->strtotype($rec_item['TYPE_VAR'],$rec_item['NEW_VALUE']);
+    $rec_item['NEW_VALUE'] = NULL;
+//    $recs[] = $rec_item;
+    SQLUpdate('beckhoff_variables',$rec_item);
+ }
+ if (count($vars)>0) {
+//    var_dump(json_encode($vars));
+    $this->httpRequest('POST',$vars);
+//    var_dump($vars);
+//    var_dump($recs);
+ }
   //to-do
  }
 /**

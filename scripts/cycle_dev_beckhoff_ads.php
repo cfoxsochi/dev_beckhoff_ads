@@ -18,6 +18,7 @@ $tmp = SQLSelectOne("SELECT ID FROM beckhoff_variables LIMIT 1");
 echo date("H:i:s") . " running " . basename(__FILE__) . PHP_EOL;
 $latest_check=0;
 $checkEvery=5; // poll every 5 seconds
+
 #echo DIR_MODULES.'dev_beckhoff_ads/run_variables';
 $variables = array( 
     "bHallLightMain"=> array(

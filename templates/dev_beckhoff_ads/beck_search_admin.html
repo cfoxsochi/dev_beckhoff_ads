@@ -1,0 +1,61 @@
+<a href="?view_mode=edit_beckhoffads_variable" class="btn btn-default"><i class="glyphicon glyphifcon-plus"></i> <#LANG_ADD_NEW_RECORD#></a>
+<br><br>
+<p>
+</p>
+
+back_search_admin
+
+[#if RESULT#]
+<!-- search results (list) -->
+<form action="?" method="post" name="frmList_modbusdevices" style="padding:0px">
+<table class="table table-striped">
+<tr>
+<thead>
+ <th  >
+    <#LANG_TITLE#>
+ </th>
+ <th  >
+ <b><#LANG_TYPE#></b>
+ </th>
+ <th  >
+ <b><#LANG_DATA#></b>
+ </th>
+<th >&nbsp;</th>
+</thead>
+</tr>
+<tbody>
+[#begin RESULT#]
+<tr >
+ <td
+   >
+  <b>
+   [#TITLE#]
+  </a></b>
+ </td>
+ <td>
+    [#TYPE_VAR#]
+ </td>
+ <td>[#VALUE#]</td>
+ <td width="130">
+ 
+  [#if "<#ACTION#>"=="admin"#]
+    <a href="?view_mode=edit_modbusdevices&id=[#ID#]" class="btn btn-default btn-sm"  title="<#LANG_EDIT#>"><i class="glyphicon glyphicon-pencil"></i></a>
+    <a href="?view_mode=poll_device&id=[#ID#]" class="btn btn-default btn-sm" title="<#LANG_UPDATE#>"><i class="glyphicon glyphicon-refresh"></i></a> 
+    <a href="?view_mode=delete_modbusdevices&id=[#ID#]" class="btn btn-default btn-sm" onClick="return confirm('<#LANG_STRING_DELETE_CONFIRM#>')"  title="<#LANG_DELETE#>"><i class="glyphicon glyphicon-remove"></i></a>
+  [#endif ACTION#]
+  
+ </td>
+</tr>
+[#end RESULT#]
+</tbody>
+</table>
+<input type="hidden" name="data_source" value="<#DATA_SOURCE#>">
+<input type="hidden" name="view_mode" value="multiple_modbusdevices">
+</form>
+<!-- / search results (list) -->
+[#else RESULT#]
+<p >
+<div class="alert alert-danger">No records found.</div>
+</p>
+[#endif RESULT#]
+<!-- / results -->
