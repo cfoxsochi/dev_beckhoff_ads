@@ -17,11 +17,11 @@ class dev_beckhoff_ads extends module {
 * @access private
 */
 function __construct() {
-  $this->name="dev_beckhoff_ads";
-  $this->title="BeckHoff ADS";
-  $this->module_category="<#LANG_SECTION_DEVICES#>";
-  $this->checkInstalled();
-  $this->port=8081;
+	$this->name="dev_beckhoff_ads";
+	$this->title="BeckHoff ADS";
+	$this->module_category="<#LANG_SECTION_DEVICES#>";
+	$this->checkInstalled();
+	$this->port=8081;
 }
 /**
 * saveParams
@@ -31,23 +31,23 @@ function __construct() {
 * @access public
 */
 function saveParams($data=1) {
- $p=array();
- if (IsSet($this->id)) {
-  $p["id"]=$this->id;
- }
- if (IsSet($this->view_mode)) {
-  $p["view_mode"]=$this->view_mode;
- }
- if (IsSet($this->edit_mode)) {
-  $p["edit_mode"]=$this->edit_mode;
- }
- if (IsSet($this->data_source)) {
-  $p["data_source"]=$this->data_source;
- }
- if (IsSet($this->tab)) {
-  $p["tab"]=$this->tab;
- }
- return parent::saveParams($p);
+	$p=array();
+	if (IsSet($this->id)) {
+		$p["id"]=$this->id;
+	}
+	if (IsSet($this->view_mode)) {
+		$p["view_mode"]=$this->view_mode;
+	}
+	if (IsSet($this->edit_mode)) {
+		$p["edit_mode"]=$this->edit_mode;
+	}
+	if (IsSet($this->data_source)) {
+		$p["data_source"]=$this->data_source;
+	}
+	if (IsSet($this->tab)) {
+		$p["tab"]=$this->tab;
+	}
+	return parent::saveParams($p);
 }
 /**
 * getParams
@@ -57,58 +57,57 @@ function saveParams($data=1) {
 * @access public
 */
 function getParams() {
-  global $id;
-  global $mode;
-  global $view_mode;
-  global $edit_mode;
-  global $data_source;
-  global $tab;
-  if (isset($id)) {
-   $this->id=$id;
-  }
-  if (isset($mode)) {
-   $this->mode=$mode;
-  }
-  if (isset($view_mode)) {
-   $this->view_mode=$view_mode;
-  }
-  if (isset($edit_mode)) {
-   $this->edit_mode=$edit_mode;
-  }
-  if (isset($data_source)) {
-   $this->data_source=$data_source;
-  }
-  if (isset($tab)) {
-   $this->tab=$tab;
-  }
+	global $id;
+	global $mode;
+	global $view_mode;
+	global $edit_mode;
+	global $data_source;
+	global $tab;
+	if (isset($id)) {
+		$this->id=$id;
+	}
+	if (isset($mode)) {
+		$this->mode=$mode;
+	}
+	if (isset($view_mode)) {
+		$this->view_mode=$view_mode;
+	}
+	if (isset($edit_mode)) {
+		$this->edit_mode=$edit_mode;
+	}
+	if (isset($data_source)) {
+		$this->data_source=$data_source;
+	}
+	if (isset($tab)) {
+		$this->tab=$tab;
+	}
 }
 function strtotype($type, $value=null){
     if ($type=='BOOL'){
-	if (is_null($value)) return false;
-	if ($value=='1') return true;
-	return false;
+		if (is_null($value)) return false;
+		if ($value=='1') return true;
+		return false;
     }
     if ($type=='BYTE'){
-	if (is_null($value)) return 0;
-	return (int) $value;
+		if (is_null($value)) return 0;
+		return (int) $value;
     }
     if ($type=='STRING'){
-	if (is_null($value)) return '';
-	return $value;
+		if (is_null($value)) return '';
+		return $value;
     }
-
     return (int) $value;
 }
 function typetostr($type,$value){
     if ($type=='BOOL'){
-	if ($value == true){
-	    return '1';
-	} else {
-	    return '0';
-	}
+		if ($value == true){
+			return '1';
+		} else {
+			return '0';
+		}
     }
     if ($type=='STRING')
-	return $value;
+		return $value;
     return (string)$value;
 }
 function getVariables(){
@@ -144,24 +143,14 @@ function readVariables(){
 //    var_dump($ads_result['bHallLightMain']);
     $updateVars=array();
     foreach ($variables as $var_item){
-	if (isset($ads_result[$var_item['TITLE']])){
-	    $var_item['VALUE']=$this->typetostr($var_item['TYPE_VAR'],$ads_result[$var_item['TITLE']]);
-//	    var_dump($var_item['TYPE_VAR']);
-#	    $updateVars[]=$var_item;
-	    SQLUpdate('beckhoff_variables', $var_item);
-	}
+		if (isset($ads_result[$var_item['TITLE']])){
+			$var_item['VALUE']=$this->typetostr($var_item['TYPE_VAR'],$ads_result[$var_item['TITLE']]);
+	//	    var_dump($var_item['TYPE_VAR']);
+	#	    $updateVars[]=$var_item;
+			SQLUpdate('beckhoff_variables', $var_item);
+		}
     }   
-
     return;
-//    var_dump($updateVars);
-    return $result;
-    foreach ($ads_result as $var_name=>$var_value){
-	if (isset($variables[$var_name])){
-	    
-	    var_dump($var_name);
-	}
-    }
-    return $result;
 }
 /**
 * Run
@@ -326,28 +315,57 @@ function usual(&$out) {
     }
    }
  }
- function processCycle() {
- $this->getConfig();
- $vars=$this->getVariables();
- file_put_contents(DIR_MODULES.$this->name.'/run_variables',json_encode($vars));
- $this->readVariables();
- $rec = SQLSelect ('SELECT * FROM beckhoff_variables WHERE NOT ISNULL(NEW_VALUE)');
- $vars=array();
-// $recs = array();
- foreach ($rec as $rec_item){
-    $vars[$rec_item['TITLE']]=$this->strtotype($rec_item['TYPE_VAR'],$rec_item['NEW_VALUE']);
-    $rec_item['NEW_VALUE'] = NULL;
-//    $recs[] = $rec_item;
-    SQLUpdate('beckhoff_variables',$rec_item);
- }
- if (count($vars)>0) {
-//    var_dump(json_encode($vars));
-    $this->httpRequest('POST',$vars);
-//    var_dump($vars);
-//    var_dump($recs);
- }
-  //to-do
- }
+function processCycle() {
+	$this->getConfig();
+	//Обновим список переменных в файле для службы
+	file_put_contents(DIR_MODULES.$this->name.'/run_variables',json_encode($this->getVariables()));
+	$items = SQLSelect("SELECT * FROM beckhoff_variables ORDER BY ID");
+	$update_vars = array();
+	$update_items = array();
+	foreach ($items as $item){
+		//Переберем все переменные из базы данных
+		if (($item['LINKED_OBJECT'] !='') AND ($item['LINKED_PROPERTY']!='')){
+			$item_value=getGlobal($item['LINKED_OBJECT'].'.'.$item['LINKED_PROPERTY']);
+			if (($item_value!=$item['VALUE']) AND ($item_value!='')){
+				$update_vars[$item['TITLE']] = $this->strtotype($item['TYPE_VAR'],$item_value); 
+				$item['VALUE'] = $this->typetostr($item['TYPE_VAR'],$item_value); //Переконвертируем значение в нужное для бекхофф
+				$update_items[] = $item; //Обновим значение в бд, после опроса...
+			}
+		}
+	}
+	//Отправим на beckhoff необходимые переменные, чтобы он принял их во внимание...
+	$this->httpRequest('POST',$update_vars); 
+	//beckhoff их принял и установил себе...
+	foreach ($update_items as $item){
+		SQLUpdate('beckhoff_variables',$item); //Обновим значение в БД
+		setGlobal($item['LINKED_OBJECT'].'.'.$item['LINKED_PROPERTY'],$item['VALUE'], array($this->name=>'0')); //Поставим правильное значение в параметре объекта
+	}
+	//Теперь прочтем состояние пременных из бекхофф
+	$items = SQLSelect("SELECT * FROM beckhoff_variables ORDER BY ID"); //Получим переменные с обновленными значениями
+	$read_vars = json_decode($this->httpRequest('GET'),true);
+	foreach ($items as $item){
+		//Сначала запишем все обновленные значения в базу...
+		if (isset($read_vars[$item['TITLE']])){//Проверим, есть-ли такая переменная в полученном списке из бекхофф
+			if ($read_vars[$item['TITLE']] <> $item['VALUE']){//Полученное значение и значение в базе различны....
+				$item_old_value=$item['VALUE']; //Получим старое значение параметра...
+				$item['VALUE'] = $this->typetostr($item['TYPE_VAR'],$read_vars[$item['TITLE']]); // Установим конвертное значение согласно установленного типа
+				SQLUpdate('beckhoff_variables',$item); //Обновим значение в базе...
+				if (($item['LINKED_OBJECT'] !='') AND ($item['LINKED_PROPERTY']!='')){//Если есть привязка к свойству объекта
+					setGlobal($item['LINKED_OBJECT'].'.'.$item['LINKED_PROPERTY'],$item['VALUE'], array($this->name=>'0')); //Обновим значение привязанного параметра...
+				}
+					//Проверим на привязку метода...
+				if (($item['LINKED_OBJECT'] !='') AND ($item['LINKED_METHOD']!='')){
+					$params=array();
+					$params['TITLE']=$item['TITLE']; //Наименование объекта
+					$params['VALUE']=$item['VALUE']; //Новое значение
+					$params['OLD_VALUE']=$item_old_value; //Старое значение...
+					callMethod($item['LINKED_OBJECT'].'.'.$item['LINKED_METHOD'], $params); // Вызовем привязанный метод...
+				}
+			}
+		}
+	}
+//to-do
+}
 /**
 * Install
 *
